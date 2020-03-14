@@ -33,3 +33,5 @@ boxplot(t(fit_g1$THETA), ylim=c(-5.5,5.5))
 boxplot(t(fit_g2$THETA), ylim=c(-5.5,5.5))
 boxplot(t(fit_BL$THETA), ylim=c(-5.5,5.5))
 ```
+
+![alt text](boxplot_ex.png "Logo Title Text 1")
