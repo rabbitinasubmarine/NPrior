@@ -1,4 +1,4 @@
-# General Bayesian Shriankge Using Neuronized Priors for Linear Regression Models
+# General Bayesian Shrinkage Using Neuronized Priors for Linear Regression Models
 
 
 Examples:
