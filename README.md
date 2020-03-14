@@ -34,4 +34,5 @@ boxplot(t(fit_g2$THETA), ylim=c(-5.5,5.5))
 boxplot(t(fit_BL$THETA), ylim=c(-5.5,5.5))
 ```
 
+A boxplot of the posterior samples of coefficients for the Boston housing data set: 
 ![alt text](boxplot_ex.png "Logo Title Text 1")
