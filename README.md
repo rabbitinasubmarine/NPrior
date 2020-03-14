@@ -1,5 +1,11 @@
 # General Bayesian Shrinkage Using Neuronized Priors for Linear Regression Models
 
+How to install:
+```
+library(devtools)
+install_github("rabbitinasubmarine/NPrior")
+```
+To use "install_github" function, you are required to install "curl" and "httr" R packages.
 
 Examples:
 ```
