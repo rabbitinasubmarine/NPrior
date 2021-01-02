@@ -5,7 +5,7 @@
 \title{Neuronized Priors for Bayesian Sparse Linear Regression}
 \usage{
 
-NPrior_run(X, y, N = 10000, BURN = 2000, prior = "SpSL-g",
+NPrior_run(X, y, N = 10000, BURN = 2000, prior = "SpSL-L",
 
 sig = NULL, eta = NULL, alpha0 = 0, alpha = NULL, w = NULL, 
 
@@ -63,6 +63,8 @@ verbose = T)
 }
 \value{
 \item{THETA}{MCMC samples of coefficients}
+\item{ALPHA}{MCMC samples of alpha}
+\item{W}{MCMC samples of w}
 \item{SIG}{MCMC samples of sigma^2}
 \item{ALPHA0}{MCMC samples of alpha0}
 \item{POST}{log-posterior density values from MCMC}
@@ -91,7 +93,7 @@ y = medv
 y = y-mean(y)
 n = nrow(X)
 p = ncol(X)
-### the default setting (SpSL-g)
+### the default setting (SpSL-L)
 #fit = NPrior_run(X, y)  
 #boxplot(t(fit$THETA))
 
@@ -103,11 +105,11 @@ p = ncol(X)
 
 ### implement a discrete spike-and-slab prior 
 ### with a Cauchy slab prior and a Beta(1,p) on the sparsity parameter.
-#fit_c = NPrior_run(X, y, prior = "SpSL-c", a0 = 1, b0 = p) 
+#fit_c = NPrior_run(X, y, prior = "SpSL-C", a0 = 1, b0 = p) 
 
 ### implement a discrete spike-and-slab prior 
 ### with a Gaussian slab prior with a fixed alpha0 = 3.
-#fit_g0 = NPrior_run(X, y, prior = "SpSL-g", alpha0_update = F, alpha0 = 3) 
+#fit_g0 = NPrior_run(X, y, prior = "SpSL-L", alpha0_update = F, alpha0 = 3) 
 }
 
 

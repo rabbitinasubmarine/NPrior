@@ -1,7 +1,8 @@
 Package: NPrior
 Type: Package
-Title: General Bayesian Shrinkage Using Neuronized Priors for Linear Regression Models
-Version: 0.1.0
+Title: General Bayesian Shrinkage Using Neuronized Priors for Linear
+        Regression Models
+Version: 0.1.5
 Author: ABC
 Maintainer: ABC <abc@gmail.com>
 Description: We develop a unified and flexible Bayesian shrinkage procedure called "Neuronized Priors". 
@@ -12,4 +13,4 @@ Imports: Rcpp, MASS
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.0.2
 NeedsCompilation: yes
-Packaged: 2020-03-14 09:07:28 UTC; mshin
+Packaged: 2020-01-1 09:22:03 UTC; mshin

@@ -9,7 +9,8 @@ double T_fun(const double& x, const double& alpha0, const int& type){
   double act;
   if(type == 1){ act = x; }
   if(type == 2){
-      act = exp( 0.37*x*abs(x)  + 0.89*x +0.08 );
+    //  act = exp( 0.37*x*fabs(x)  + 0.89*x +0.08 );
+    act = exp( 0.5*x*fabs(x)  + 0.733*x);
   }
   if(type == 3){
     if(x > alpha0){
@@ -20,7 +21,16 @@ double T_fun(const double& x, const double& alpha0, const int& type){
   }
   if(type == 4){
     if(x > alpha0){
-      act = exp( 0.37*(x-alpha0)*(x-alpha0)  + 0.94*abs(x-alpha0) - 0.48 );
+      act = exp( 0.5*(x-alpha0)*(x-alpha0)  - 1.27*(x-alpha0) + 0.29 );
+      //act = exp( 0.37*(x-alpha0)*(x-alpha0)  + 0.94*fabs(x-alpha0) - 0.48 );
+    }else{
+      act = 0.0;
+    }
+  }
+  if(type == 4){
+    if(x > alpha0){
+      act = 1.0;
+      //act = exp( 0.37*(x-alpha0)*(x-alpha0)  + 0.94*fabs(x-alpha0) - 0.48 );
     }else{
       act = 0.0;
     }
@@ -34,11 +44,26 @@ double T_fun(const double& x, const double& alpha0, const int& type){
 
 // [[Rcpp::export]]
 Rcpp::List Neuro_Linear(const arma::vec & y, const arma::mat & X, int  N, int BURN, arma::colvec alpha,  arma::colvec w, arma::colvec sig, double n1, double p1, double  eta, double  alpha0, double size_a,  const int & type,
-                        const int & eta_update, const int & alpha0_update, const int & sig_update,const int & K, const int & B_size, const double & a0, const double & b0, const int & prior_sig_type, const int & verbose){
+                        const int & eta_update, const int & alpha0_update, const int & sig_update,const int & K, const int & B_size, 
+                        const double & a0, const double & b0, const int & prior_sig_type, const int & verbose){
   int n =  X.n_rows, p = X.n_cols;
   int B = p / B_size;
 //double a0 = 1.0, b0 = 1.0;
-
+  int J0 = 5;
+  int J = 10;
+  int jj;
+  double aux=0.0;
+  double aux_cand=0.0;
+  double m0;
+  double acc_a0 = 0.0;
+  double cand1, curr1;
+  arma::colvec res2(1);
+  NumericVector sam_prob(J);
+  IntegerVector sam_J(J);
+  IntegerVector s(1);
+  NumericVector CAND(J);
+  arma::colvec alpha0_CAND(J);
+  
   arma::mat X_sub(n,B_size);
   arma::mat XtX(B_size,B_size);
   arma::colvec Xty(B_size);
@@ -68,7 +93,7 @@ Rcpp::List Neuro_Linear(const arma::vec & y, const arma::mat & X, int  N, int BU
   arma::mat SAVE_theta(p,N); SAVE_theta.zeros();
   arma::mat SAVE_alpha(p,N); SAVE_alpha.zeros();
   arma::uvec ind;
-  //arma::mat SAVE_w(p,N); SAVE_w.zeros();
+  arma::mat SAVE_w(p,N); SAVE_w.zeros();
   arma::colvec OBJ(N), SIG(N), ETA(N), theta_save(p), gam_save(p), gam(p);
   theta_save.zeros();
   gam_save.zeros();
@@ -77,7 +102,7 @@ Rcpp::List Neuro_Linear(const arma::vec & y, const arma::mat & X, int  N, int BU
   arma::colvec ALPHA0(N);
 
   if(type < 3){
-    alpha0=0;
+    alpha0 = 0.0;
   }
   //NumericVector prop(p);
   //double res;
@@ -95,17 +120,60 @@ Rcpp::List Neuro_Linear(const arma::vec & y, const arma::mat & X, int  N, int BU
     act = T_fun(alpha(ii), alpha0, type);
     //prob0(ii) = 1/p1;
   }
-
   for(i=0; i< (N+BURN); i++){
-    if(type == 3 || type == 4){
+    if(type == 3 || type == 4 || type == 5){
       if(alpha0_update == 1){
-        if(i % 10 == 0){
-          a = sum(gam) + a0;
-          d = p - sum(gam) + b0;
-          c = R::rbeta(a,d);
-          alpha0 = R::qnorm(c, 0.0, 1.0, 0, 0);
+        if(a0 == 1.0 & b0 == 1.0){
+        //if(i % 10 == 0){
+          //a = sum(gam) + a0;
+          //d = p - sum(gam) + b0;
+          //c = R::rbeta(a,d);
+          //alpha0 = R::qnorm(c, 0.0, 1.0, 0, 0);
+        //}
+          a = -1.0*(alpha0 + sum(alpha))/(1.0 + p1);
+          d = 1.0/(1.0 + p1);
+          aux = a + R::rnorm(0.0, 1.0)*sqrt(d); 
+          alpha0 += aux;
+          alpha += aux;
+          //Rcpp::Rcout << "#######" << std::endl;
+        }else{
+          a = -1.0*(alpha0 + sum(alpha))/(1.0+p1);
+          d = 1.0/(1.0+p1);
+          for(jj=0; jj<J0; jj++){
+            curr1 = 0.0;
+            curr1 += -0.5*(alpha0 + aux)*(alpha0 + aux) + (a0-1.0)*R::pnorm(alpha0+aux, 0.0, 1.0, 0, 1);
+            res2 = (alpha+aux).t()*(alpha+aux);
+            curr1 += -0.5*res2(0) + (b0-1.0)*R::pnorm(alpha0+aux, 0.0, 1.0, 1, 1);
+            curr1 += 0.5*d*(aux-a)*(aux-a);
+            for(ii=0; ii<J; ii++){
+              aux_cand = a + R::rnorm(0.0, 1.0)*sqrt(d); 
+              alpha0_CAND(ii) = aux_cand;
+              cand1 = 0.0;
+              cand1 += -0.5*(alpha0 + aux_cand)*(alpha0 + aux_cand) + (a0-1.0)*R::pnorm(alpha0+aux_cand, 0.0, 1.0, 0, 1);
+              res2 = (alpha+aux_cand).t()*(alpha+aux_cand);
+              cand1 += -0.5*res2(0) + (b0-1.0)*R::pnorm(alpha0+aux_cand, 0.0, 1.0, 1, 1);
+              cand1 += 0.5*d*(aux_cand-a)*(aux_cand-a);
+              CAND(ii) = cand1;
+            }
+            m0 = max(CAND);
+            sam_prob = exp(CAND-m0);//+0.00000000001;
+            s = Rcpp::sample(sam_J, 1, FALSE, sam_prob);
+            aux_cand = alpha0_CAND(s(0));
+            bb = sum(sam_prob);
+            aa = bb - sam_prob(s(0)) + exp(curr1-m0);
+            //curr1 = log(aa+0.00000000001);
+            //cand1 = log(bb+0.00000000001);
+            cc = log(bb/aa);//cand1 - curr1;
+            aa = R::runif( 0.0, 1.0);
+            if(cc > log(aa) ){
+              aux = aux_cand;
+              acc_a0 += 1.0;
+            }
+          }
+          alpha += aux;
+          alpha0 += aux;
         }
-      }
+    }
     }
     
     for(ii=0; ii<p; ii++){
@@ -230,7 +298,7 @@ if( i % 2 == 0){
       theta_save = theta_save + theta/N;
       gam_save = gam_save + gam/N;
       SAVE_theta.col(i-BURN) = theta;
-    //SAVE_w.col(i-BURN) = w;
+      SAVE_w.col(i-BURN) = w;
       SAVE_alpha.col(i-BURN) = alpha;
       SIG(i-BURN) = sig(0);
       ETA(i-BURN) = eta;
@@ -255,7 +323,8 @@ if( i % 2 == 0){
                             Rcpp::Named("ALPHA0") = ALPHA0,
                             Rcpp::Named("theta") = theta_save,
                             Rcpp::Named("gam") = gam_save,
-                            //Rcpp::Named("w") = SAVE_w,
+                            Rcpp::Named("W") = SAVE_w,
+                            Rcpp::Named("acc_a0") = acc_a0/(N+BURN),
                             Rcpp::Named("POST") = OBJ,
                             Rcpp::Named("sig") = SIG,
                             Rcpp::Named("eta") = ETA

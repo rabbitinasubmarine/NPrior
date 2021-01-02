@@ -5,6 +5,10 @@ Neuro_Linear <- function(y, X, N, BURN, alpha, w, sig, n1, p1, eta, alpha0, size
     .Call(`_NPrior_Neuro_Linear`, y, X, N, BURN, alpha, w, sig, n1, p1, eta, alpha0, size_a, type, eta_update, alpha0_update, sig_update, K, B_size, a0, b0, prior_sig_type, verbose)
 }
 
+Neuro_Linear_custom <- function(y, X, N, BURN, alpha, w, sig, n1, p1, eta, alpha0, size_a, act_type, SpSL_type, lam1, lam2, lam3, eta_update, alpha0_update, sig_update, K, B_size, a0, b0, prior_sig_type, verbose) {
+    .Call(`_NPrior_Neuro_Linear_custom`, y, X, N, BURN, alpha, w, sig, n1, p1, eta, alpha0, size_a, act_type, SpSL_type, lam1, lam2, lam3, eta_update, alpha0_update, sig_update, K, B_size, a0, b0, prior_sig_type, verbose)
+}
+
 Neuro_ReLU_Linear <- function(y, X, N, BURN, alpha, w, sig, n1, p1, eta, alpha0, a0, b0, alpha0_update, eta_update, sig_update, B_size, prior_sig_type, verbose) {
     .Call(`_NPrior_Neuro_ReLU_Linear`, y, X, N, BURN, alpha, w, sig, n1, p1, eta, alpha0, a0, b0, alpha0_update, eta_update, sig_update, B_size, prior_sig_type, verbose)
 }
