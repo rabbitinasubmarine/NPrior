@@ -159,10 +159,10 @@ Rcpp::List Neuro_ReLU_Linear(const arma::vec & y, const arma::mat & X,
 
 
     //sam = RcppArmadillo::sample(sam1, p, FALSE, prob);
-    sam = Rcpp::sample(sam1, p, FALSE, NumericVector::create());
+    //sam = Rcpp::sample(sam1, p, FALSE, NumericVector::create());
       res = y - X*theta;
       for(ii=0; ii<p; ii++){
-        j = sam(ii);
+        j = ii;//sam(ii);
         res = res +  X.col(j)*theta(j);
         rx = res.t()*X.col(j);
         a_t = (rx(0)*w(j) + X_norm(j)*alpha0*w(j)*w(j))/(X_norm(j)*w(j)*w(j) + sig(0));
