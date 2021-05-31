@@ -7,11 +7,11 @@
 
 NPrior_run(X, y, N = 10000, BURN = 2000, prior = "SpSL-L",
 
-sig = NULL, eta = NULL, alpha0 = 0, alpha = NULL, w = NULL, 
+sig = NULL, eta = NULL, alpha0 = NULL, alpha = NULL, w = NULL, 
 
 sig_update = T, alpha0_update = T, method = "exact", 
 
-prior_prop = 0.01, s = 2, K = 10, B_size = NULL, a0 = 1, b0 = 1, prior_sig_type = 0, 
+prior_prop = NULL, s = 2, K = 10, B_size = NULL, a0 = 1, b0 = 1, prior_sig_type = 0, 
 
 verbose = T)
 
@@ -25,13 +25,13 @@ verbose = T)
 
 \item{BURN}{Total burnin iterations. The default is 2000.}
 
-\item{prior}{The type of priors; "SpSL-g": discrete spike and slab prior with a Gaussian prior; "SpSL-c": discrete spike and slab prior with a Cauchy prior; "HS": horseshoe prior ; "BL": Bayesian LASSO. The default is "SpSL-g"}
+\item{prior}{The type of priors; "SpSL-L": discrete spike and slab prior with a Laplace-like prior (T(t) = max{0,t}); "SpSL-C": discrete spike and slab prior with a Cauchy prior (T(t) = exp( 0.5*t^2  - 1.27*t + 0.29 )), if t>0 and 0, otherwise); "SpSL-G": discrete spike and slab prior with a Gaussian prior (T(t) = 1, if t>0 and 0,. otherwise);  "HS": horseshoe prior ; "BL": Bayesian LASSO. The default is "SpSL-L"}
 
 \item{sig}{The value of sigma^2}
 
-\item{eta}{The variance parameter of w. For "SpSL-c" and "SpSL-g", the default is 1. For "HS" and "BL", the default is p^-2.}
+\item{eta}{The variance parameter of w. For "SpSL-L", "SpSL-C" and "SpSL-G", the default is 1. For "HS" and "BL", the default is p^-2.}
 
-\item{alpha0}{The value of alpha0. For the continuous shrinkage priors ("HS" and "BL"), this option will be ignored.}
+\item{alpha0}{The value of alpha0. For the continuous shrinkage priors ("HS" and "BL"), this option will be ignored and set to be alpha0 = 0.}
 
 \item{alpha}{The initial value of alpha}
 
@@ -43,7 +43,7 @@ verbose = T)
 
 \item{method}{For discrete SpSL, a method of updating alpha in MCMC; "exact": using a closed form of conditional posterior; "RWMH": using a random walk Metropolis Hasting algorithm to update alpha}
 
-\item{prior_prop}{The value of prior proportion of non-zero parameters}
+\item{prior_prop}{The value of prior proportion of non-zero parameters; then, alpha0 is set to be -Phi^{-1}(prior_prop). When alpha0 is specifeid, this option will be ignored. The default is NULL.}
 
 \item{s}{The scale of proposal distribution in the random walk MH algorithm}
 
@@ -62,13 +62,15 @@ verbose = T)
 \item{verbose}{verbose. The default is T.}
 }
 \value{
-\item{THETA}{MCMC samples of coefficients}
-\item{ALPHA}{MCMC samples of alpha}
-\item{W}{MCMC samples of w}
-\item{SIG}{MCMC samples of sigma^2}
-\item{ALPHA0}{MCMC samples of alpha0}
-\item{POST}{log-posterior density values from MCMC}
+\item{ThetaSamples}{the MCMC samples of coefficients}
+\item{ThetaHat}{the posterior mean of coefficients}
+\item{SigSamples}{the MCMC samples of sigma^2}
+\item{Alpha0Samples}{the MCMC samples of alpha0}
+\item{AlphaSamples}{the MCMC samples of alpha}
+\item{WSamples}{the MCMC samples of w}
+\item{POST}{the log-posterior density values from the MCMC}
 \item{setting}{The specified settings}
+
 }
 \description{
 We develop a unified and flexible Bayesian shrinkage procedure called "Neuronized Priors". }

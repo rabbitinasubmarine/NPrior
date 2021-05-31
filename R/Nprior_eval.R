@@ -1,6 +1,6 @@
 NPrior_run = function(X, y, N=10000, BURN=2000, prior="SpSL-L", sig = NULL, eta = NULL, alpha0 = NULL, alpha = NULL, w = NULL,
                   sig_update = T, alpha0_update = T, method = "exact",
-                  prior_prop = 0.01, s=2, K=10, B_size = NULL, a0 = 1, b0 = 1, prior_sig_type = 0, verbose = T){
+                  prior_prop = NULL, s=2, K=10, B_size = NULL, a0 = 1, b0 = 1, prior_sig_type = 0, verbose = T){
 # SpSL-g
 # SpSL-c
 # BL
@@ -8,7 +8,22 @@ NPrior_run = function(X, y, N=10000, BURN=2000, prior="SpSL-L", sig = NULL, eta 
 #   Install Package:           'Ctrl + Shift + B'
 #   Check Package:             'Ctrl + Shift + E'
 #   Test Package:              'Ctrl + Shift + T'
-
+if(is.null(prior_prop) == F && is.null(alpha0) == F){
+  print("Both 'alpha0' and 'prior_prop' are specified. The value of 'alpha0' will be used, and 'prior_prop' will be ignored.")
+}
+  
+if( is.null(sig)  == T ){
+  co = stats::cor(X,y)
+  j = which.max(co)
+  res = stats::lm(y~X[,j])$residuals
+  sig = sum(res^2)/(n-1)
+}
+if(is.null(prior_prop) == F){
+  if(prior_prop > 0.99999999999){prior_prop = 0.99999999999}
+  if(prior_prop < 0.00000000001){prior_prop = 0.00000000001}
+#print(prior_prop)  
+}
+sig1 = matrix(sig,1,1)
 n = nrow(X)
 p = ncol(X)
 if(prior == "SpSL-L"){type=3L}
@@ -16,23 +31,33 @@ if(prior == "SpSL-C"){type=4L}
 if(prior == "SpSL-G"){type=5L}
 if(prior == "HS"){type=2L}
 if(prior == "BL"){type=1L}
-
+#alpha00 = alpha0
 if( is.null(alpha0)  == T ){
    if(type == 1 | type == 2){
      alpha0 = 0
-     
    }else{
-     alpha0 = -stats::qnorm(1/p)
+     if( is.null(prior_prop)  == F ){
+       alpha0 = -1.0*stats::qnorm(prior_prop)
+     }else{
+       alpha0 = -stats::qnorm(1/p)
+     }
    }
-  }
+}
 if( is.null(alpha)  == T ){alpha = stats::rnorm(p)*0.1}
 if( is.null(w)  == T ){w = stats::rnorm(p)*0.1}
-if( is.null(sig)  == T ){sig = stats::rnorm(1)^2; sig1 = matrix(sig,1,1)}
+if( is.null(sig)  == T ){sig = stats::rnorm(1)^2}
+
+
 if( is.null(B_size)  == T ){
   if(p > 50){
     B_size = 50
   }else{
     B_size = p
+  }
+}
+if( is.null(alpha0)  == T ){
+  if( is.null(prior_prop)  == F ){
+    alpha0 = -1.0*stats::qnorm(prior_prop)
   }
 }
 if(is.null(eta)){
@@ -63,12 +88,29 @@ if(length(id) == 0){
   prior = "SpSL-L"
   print("The prior type is not correct! The default (SpSL-L) is going to be used.")
 }
+if(alpha0_update == T){
+  if(type>3){
+    print(paste("The initial value of alpha0 is set to be ", round(alpha0,3),", and alpha0 will be sampled in the MCMC algorithm.",sep=""))
+  }else{
+    print("Continuous shrinkate prior is specified as the prior.")
+    print(paste("The initial value of alpha0 is set to be ", round(alpha0,3),", and alpha0 will NOT be sampled in the MCMC algorithm.",sep=""))
+  }
+}else{
+  if(is.null(prior_prop) == T){
+    #print("Both 'alpha0' and 'prior_prop' are specified.")
+    print(paste("The value of alpha0 is fixed to be ", round(alpha0,3),"  and alpha0 will NOT be updated.",sep="") )
+  }else{
+    #print("'prior_prop' is specified.")
+    print(paste("The value of alpha0 is fixed to be ",round(alpha0,3)," = -Phi^{-1}(prior_prop).",sep="") )
+  }
+}
+
+print("################################################")
 if(sig_update == T){ s_u = 1}else{ s_u = 0 }
 if(alpha0_update == T){ a0_u = 1}else{ a0_u = 0 }
 if(type == 1 | type == 2){a0_u = 0}
 if(verbose == T){verbose = 1}else{verbose = 0}
 pmt = proc.time()[3]
-#alpha0 = -1.0*stats::qnorm(prior_prop)
   if(type == 3 & method == "exact"){
     res = Neuro_ReLU_Linear( y, X, N, BURN = BURN, alpha,  w,
                                 sig1, n1=n,  p1=p, eta = eta, alpha0 = alpha0,
@@ -85,8 +127,11 @@ pmt = proc.time()[3]
   }
 time0 = proc.time()[3] - pmt
 print(time0)
-setting = list(type = type, eta = eta, alpha0 = alpha0, alpha0_update = alpha0_update, a0 = a0, b0 = b0, sig_update = sig_update, prior_sig_type = prior_sig_type)
-return(list( THETA = res$THETA, SIG = res$sig, ALPHA0 = res$ALPHA0, ALPHA = res$ALPHA, W = res$W, POST = res$POST, setting = setting))
+ThetaHat = rowMeans(res$THETA)
+setting = list(type = prior, eta = eta, alpha0 = alpha0, alpha0_update = alpha0_update, a0 = a0, b0 = b0, sig_update = sig_update, sig = sig, prior_sig_type = prior_sig_type)
+print(setting)
+return(list( ThetaSamples = res$THETA, ThetaHat = ThetaHat, SigSamples = res$sig, 
+             Alpha0Samples = res$ALPHA0, AlphaSamples = res$ALPHA, WSamples = res$W, POST = res$POST, setting = setting))
 }
 
 

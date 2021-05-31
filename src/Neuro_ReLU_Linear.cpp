@@ -84,7 +84,7 @@ Rcpp::List Neuro_ReLU_Linear(const arma::vec & y, const arma::mat & X,
     
     //if(type == 3 || type == 4 || type == 5){
       if(alpha0_update == 1){
-        if(a0 == 1.0 & b0 == 1.0){
+        if(a0 == 1.0 && b0 == 1.0){
           //if(i % 10 == 0){
           //a = sum(gam) + a0;
           //d = p - sum(gam) + b0;

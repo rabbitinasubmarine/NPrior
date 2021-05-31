@@ -5,11 +5,11 @@
 \title{Neuronized Priors for Bayesian Sparse Linear Regression}
 \usage{
 
-NPrior_run_custom(X, y, N = 10000, BURN = 2000, act_type, SpSL_type, lam1,
+NPrior_run_custom(X, y, N = 10000, BURN = 2000, lam1, lam2, lam3, act_type, 
 
-lam2, lam3, sig = NULL, eta = NULL, alpha0 = 0, alpha = NULL, 
+SpSL_type, sig = NULL, eta = 1, alpha0 = NULL, alpha = NULL, 
 
-w = NULL,  sig_update = T, alpha0_update = T, method = "exact", 
+w = NULL,  sig_update = T, alpha0_update = T,
 
 prior_prop = 0.01, s = 2, K = 10, B_size = NULL, a0 = 1, b0 = 1, 
 
@@ -25,11 +25,13 @@ prior_sig_type = 0, verbose = T)
 
 \item{BURN}{Total burnin iterations. The default is 2000.}
 
-\item{act_type}{The type of activation function; act_type == 1: T(x) = exp( lam1*t*abs(t) + lam2*t + lam3 ); act_type == 2: T(x) = exp( lam1*t*t + lam2*t + lam3 ).}
-\item{SpSL_type}{SpSL_type == 0 indicates a continuouse prior without a discrete mixture of spike-and-slab. SpSL_type == 1 implements a discrete mixture of spike-and-slab where the slab part is the customized prior.}
-\item{lam1}{A parameter that determines the neruonized prior. See "act_type"}
+\item{lam1}{A parameter that determines the neruonized prior. See "act_type"; act(x) = exp( lam1*x*|x|  + lam2*x + lam3).}
 \item{lam2}{A parameter that determines the neruonized prior. See "act_type"}
 \item{lam3}{A parameter that determines the neruonized prior. See "act_type"}
+
+
+\item{act_type}{The type of activation function; act_type == 1: T(x) = exp( lam1*t*abs(t) + lam2*t + lam3 ); act_type == 2: T(x) = exp( lam1*t*t + lam2*t + lam3 ).}
+\item{SpSL_type}{SpSL_type == 0 indicates a continuouse prior without a discrete mixture of spike-and-slab. SpSL_type == 1 implements a discrete mixture of spike-and-slab where the slab part is the customized prior.}
 
 
 \item{sig}{The value of sigma^2}
@@ -46,7 +48,6 @@ prior_sig_type = 0, verbose = T)
 
 \item{alpha0_update}{T: update alpha0; F: no update alpha0. The default is T. Fpr "HS" and "BL", this option will be ignored and set alpha0=0.}
 
-\item{method}{For discrete SpSL, a method of updating alpha in MCMC; "exact": using a closed form of conditional posterior; "RWMH": using a random walk Metropolis Hasting algorithm to update alpha}
 
 \item{prior_prop}{The value of prior proportion of non-zero parameters}
 
@@ -106,9 +107,10 @@ S = rt(20000,df=3)
 #lam3 = res_T$lam3
 # a discrete spike-and-slab priro based on the target prior.
 #fit1 = NPrior_run_custom(X, y, act_type = 1, SpSL_type = 1, 
-lam1 = lam1, lam2=lam2,lam3=lam3)  
+#lam1 = lam1, lam2=lam2,lam3=lam3)  
 #a continuous shrinkage prior with the global shrinkage parameter 0.01.   
-#fit2 = NPrior_run_custom(X, y, act_type = 1, SpSL_type = 0, lam1 = lam1, lam2=lam2,lam3=lam3, eta = 0.01) 
+#fit2 = NPrior_run_custom(X, y, act_type = 1, SpSL_type = 0, 
+#lam1 = lam1, lam2=lam2,lam3=lam3, eta = 0.01) 
 #boxplot(t(fit1$THETA))
 #boxplot(t(fit2$THETA))
 

@@ -27,7 +27,7 @@ double T_fun(const double& x, const double& alpha0, const int& type){
       act = 0.0;
     }
   }
-  if(type == 4){
+  if(type == 5){
     if(x > alpha0){
       act = 1.0;
       //act = exp( 0.37*(x-alpha0)*(x-alpha0)  + 0.94*fabs(x-alpha0) - 0.48 );
@@ -123,7 +123,7 @@ Rcpp::List Neuro_Linear(const arma::vec & y, const arma::mat & X, int  N, int BU
   for(i=0; i< (N+BURN); i++){
     if(type == 3 || type == 4 || type == 5){
       if(alpha0_update == 1){
-        if(a0 == 1.0 & b0 == 1.0){
+        if(a0 == 1.0 && b0 == 1.0){
         //if(i % 10 == 0){
           //a = sum(gam) + a0;
           //d = p - sum(gam) + b0;

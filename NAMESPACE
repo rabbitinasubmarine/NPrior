@@ -1,3 +1,4 @@
 useDynLib(NPrior, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
+importFrom("stats", "quantile")
 exportPattern("^[[:alpha:]]+")
