@@ -11,6 +11,8 @@ NPrior_run = function(X, y, N=10000, BURN=2000, prior="SpSL-L", sig = NULL, eta 
 if(is.null(prior_prop) == F && is.null(alpha0) == F){
   print("Both 'alpha0' and 'prior_prop' are specified. The value of 'alpha0' will be used, and 'prior_prop' will be ignored.")
 }
+n = nrow(X)
+p = ncol(X)
   
 if( is.null(sig)  == T ){
   co = stats::cor(X,y)
@@ -24,8 +26,6 @@ if(is.null(prior_prop) == F){
 #print(prior_prop)  
 }
 sig1 = matrix(sig,1,1)
-n = nrow(X)
-p = ncol(X)
 if(prior == "SpSL-L"){type=3L}
 if(prior == "SpSL-C"){type=4L}
 if(prior == "SpSL-G"){type=5L}
